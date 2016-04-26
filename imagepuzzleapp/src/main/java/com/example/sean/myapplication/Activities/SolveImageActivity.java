@@ -30,12 +30,11 @@ import static com.example.sean.myapplication.Util.Util.messageBox;
 public class SolveImageActivity extends AppCompatActivity {
     //default table size set to be 3x3
     private int tableWidth = 3, tableHeight = 3;
+
+    //image URI received from main activity
     private  Uri imageUri;
     private Bitmap originalImage;
     private ImagePuzzle imagePuzzle;
-
-    //List of bitmap image pieces with their original index in the table.
-    List<PuzzlePiece> imagePieceList = new ArrayList<>();
 
     TableLayout table;
 
@@ -91,6 +90,9 @@ public class SolveImageActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    ** OnLongClickListener for each view cell in the table.
+     */
     private final class ImageOnLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View view) {
@@ -105,7 +107,10 @@ public class SolveImageActivity extends AppCompatActivity {
         }
     }
 
-    protected class ImageDragEventListener implements View.OnDragListener {
+    /*
+    ** DragEventListener for each view cell in the table.
+     */
+    private class ImageDragEventListener implements View.OnDragListener {
         public boolean onDrag(View v, DragEvent event) {
             ImageView view = (ImageView) v;
             final int action = event.getAction();
@@ -157,39 +162,13 @@ public class SolveImageActivity extends AppCompatActivity {
     private void swapImages(int i, int j) {
         ImageView viewI = (ImageView) table.findViewWithTag(i);
         ImageView viewJ = (ImageView) table.findViewWithTag(j);
-
         viewI.setImageBitmap(imagePuzzle.getImageAt(j));
         viewJ.setImageBitmap(imagePuzzle.getImageAt(i));
 
         imagePuzzle.swap(i, j);
-        /*
-        TableLayout table = (TableLayout) findViewById(R.id.shuffledImageTable);
-        ImageView imageViewI = (ImageView) table.findViewWithTag(i);
-        ImageView imageViewJ = (ImageView) table.findViewWithTag(j);
-        Bitmap imageI = ((BitmapDrawable) imageViewI.getDrawable()).getBitmap();
-        Bitmap imageJ = ((BitmapDrawable) imageViewJ.getDrawable()).getBitmap();
-
-        imageViewI.setImageBitmap(imageJ);
-        imageViewJ.setImageBitmap(imageI);
-
-        //swap the orderings in the ArrayList data structure
-        Collections.swap(imagePieceList, i, j);
-        */
     }
+
 /*
-    private boolean isPuzzleSolved() {
-        ListIterator
-        for(int i = 0; i < imagePieceList.size(); i++) {
-            int index = imagePieceList.get(i).getKey();
-            //if the index attached to the bitmap image is not in order, return false
-            if(index != i) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public void setPadding(ImageView view, int row, int column) {
         if(row == 0) {
             if(column == 0) {
