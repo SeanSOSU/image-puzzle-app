@@ -40,6 +40,7 @@ public class ImagePuzzle {
     public int getWidth() { return width; }
     public int getHeight() { return height; }
     public List<PuzzlePiece> getPieceList() { return pieceList; }
+    public int getCorrectPositions() { return correctPositions; }
 
     public void setWidth(int width) { this.width = width; }
     public void setHeight(int height) { this.height = height; }
@@ -77,15 +78,18 @@ public class ImagePuzzle {
     ** Swaps two elements in the arraylist in place and update correct positions
      */
     public void swap(int i, int j) {
+        if(i == j) {
+            return;
+        }
         //if already in correction position, decrement
         if(pieceList.get(i).getOriginalIndex() == i) {
             correctPositions--;
         } else if(pieceList.get(i).getOriginalIndex() == j) {
             correctPositions++;
         }
-        if(pieceList.get(j).getOriginalIndex() == i) {
+        if(pieceList.get(j).getOriginalIndex() == j) {
             correctPositions--;
-        } else if(pieceList.get(j).getOriginalIndex() == j) {
+        } else if(pieceList.get(j).getOriginalIndex() == i) {
             correctPositions++;
         }
 
@@ -103,14 +107,21 @@ public class ImagePuzzle {
     /*
     ** shuffles the ordering of puzzle pieces
      */
-    public void shuffle() {
+    private void shuffle() {
         Collections.shuffle(pieceList);
+    }
+
+    public void reShuffle() {
+        this.shuffle();
+        this.initCorrectPositions();
     }
 
     /*
     ** Iterates through the array and initializes the number of pieces in the correct position
      */
     private void initCorrectPositions() {
+        correctPositions = 0;
+
         for(int i = 0; i < pieceList.size(); i++) {
             if(i == pieceList.get(i).getOriginalIndex()) {
                 correctPositions++;

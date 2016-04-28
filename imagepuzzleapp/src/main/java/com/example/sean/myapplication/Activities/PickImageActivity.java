@@ -176,6 +176,9 @@ public class PickImageActivity extends AppCompatActivity {
         return inSampleSize;
     }
 
+    /*
+    ** Opens SolveImageActivity and sends the bitmap Uri
+     */
     public void shuffleImage(View view) {
         //If imageUri is null, then an image has not been selected yet.
         if(imageUri == null) {

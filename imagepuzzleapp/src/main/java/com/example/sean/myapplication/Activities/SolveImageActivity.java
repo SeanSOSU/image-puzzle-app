@@ -38,6 +38,7 @@ public class SolveImageActivity extends AppCompatActivity {
     private  Uri imageUri;
     private Bitmap originalImage;
     private ImagePuzzle imagePuzzle;
+    private boolean dragEnabled = true;
 
     TableLayout table;
 
@@ -100,7 +101,6 @@ public class SolveImageActivity extends AppCompatActivity {
         @Override
         public boolean onLongClick(View view) {
             ClipData.Item item = new ClipData.Item((CharSequence)view.getTag().toString());
-
             String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
             ClipData dragData = new ClipData(view.getTag().toString(), mimeTypes, item);
             View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
@@ -136,14 +136,14 @@ public class SolveImageActivity extends AppCompatActivity {
                     int i = (int) view.getTag();
                     int j = Integer.parseInt(item.getText().toString());
                     swapImages(i, j);
-                    if(imagePuzzle.isPuzzleSolved()) {
-                        view.setOnLongClickListener(null);
-                    }
-
                     return true;
 
                 case DragEvent.ACTION_DRAG_ENDED:
                     view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
+                    if(imagePuzzle.isPuzzleSolved()) {
+                        view.setOnLongClickListener(null);
+                        dragEnabled = false;
+                    }
                     return true;
 
                 default:
@@ -158,12 +158,31 @@ public class SolveImageActivity extends AppCompatActivity {
     ** Swaps the position of bitmap images in the views of the table
      */
     private void swapImages(int i, int j) {
+        if(i == j) {
+            return;
+        }
+
         ImageView viewI = (ImageView) table.findViewWithTag(i);
         ImageView viewJ = (ImageView) table.findViewWithTag(j);
         viewI.setImageBitmap(imagePuzzle.getImageAt(j));
         viewJ.setImageBitmap(imagePuzzle.getImageAt(i));
-
         imagePuzzle.swap(i, j);
+    }
+
+    /*
+    ** onClick listener for reshuffle button.
+    ** Reshuffles the image and sets the bitmap images for each table cell.
+     */
+    public void reShuffle(View view) {
+        imagePuzzle.reShuffle();
+        for(int i = 0; i < tableWidth * tableHeight; i++) {
+            ImageView imageView = (ImageView) table.findViewWithTag(i);
+            imageView.setImageBitmap(imagePuzzle.getImageAt(i));
+            //re-enable drag listener if disabled
+            if (!dragEnabled) {
+                imageView.setOnLongClickListener(new ImageOnLongClickListener());
+            }
+        }
     }
 
 }

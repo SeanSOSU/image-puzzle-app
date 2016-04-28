@@ -5,6 +5,7 @@
     <string name="button_send">Send</string>
     <string name="title_activity_display_message">My Message</string>
     <string name="button_shuffle">Shuffle</string>
+    <string name="button_reshuffle">Reshuffle</string>
     <string name="select_an_image">Select an image</string>
     <string name="solve_the_image">Solve the puzzle</string>
     <string name="toolbar_title">Shuffler</string>
