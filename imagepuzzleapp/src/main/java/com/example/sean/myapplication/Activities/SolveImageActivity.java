@@ -1,3 +1,6 @@
+//TODO: add reshuffle functionality and button
+//TODO: add "hint" functionality
+
 package com.example.sean.myapplication.Activities;
 
 import android.content.ClipData;
@@ -129,11 +132,6 @@ public class SolveImageActivity extends AppCompatActivity {
 
                 case DragEvent.ACTION_DROP:
                     view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
-
-
-                    //ClipData.Item item = event.getClipData().getItemAt(0);
-                    //ImageView draggedView = (ImageView) table.findViewWithTag(
-                      //      Integer.parseInt(item.getText().toString()));
                     ClipData.Item item = event.getClipData().getItemAt(0);
                     int i = (int) view.getTag();
                     int j = Integer.parseInt(item.getText().toString());
@@ -168,18 +166,4 @@ public class SolveImageActivity extends AppCompatActivity {
         imagePuzzle.swap(i, j);
     }
 
-/*
-    public void setPadding(ImageView view, int row, int column) {
-        if(row == 0) {
-            if(column == 0) {
-                view.setPadding(2, )
-            }
-        }
-    }
-
-    public void reShuffle() {
-        Collections.shuffle(shuffledImage);
-        setShuffledImage(shuffledImage);
-    }
-*/
 }
