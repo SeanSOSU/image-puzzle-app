@@ -8,6 +8,7 @@
     <string name="button_reshuffle">Reshuffle</string>
     <string name="select_an_image">Select an image</string>
     <string name="solve_the_image">Solve the puzzle</string>
+    <string name="solved">Solved!</string>
     <string name="toolbar_title">Shuffler</string>
     <string name="title_activity_solve_image">SolveImageActivity</string>
 </resources>

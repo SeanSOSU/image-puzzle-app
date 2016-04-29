@@ -1,8 +1,13 @@
-//TODO: add reshuffle functionality and button
+//TODO: add animations to solved and reshuffle
 //TODO: add "hint" functionality
+//TODO: add ability to send puzzles to friends
+//TODO: add sounds
 
 package com.example.sean.myapplication.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
@@ -14,9 +19,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.DragEvent;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sean.myapplication.Models.ImagePuzzle;
@@ -33,14 +40,30 @@ import static com.example.sean.myapplication.Util.Util.messageBox;
 public class SolveImageActivity extends AppCompatActivity {
     //default table size set to be 3x3
     private int tableWidth = 3, tableHeight = 3;
+    private final static int BORDERSIZE = 2;
 
     //image URI received from main activity
     private  Uri imageUri;
     private Bitmap originalImage;
     private ImagePuzzle imagePuzzle;
-    private boolean dragEnabled = true;
+    private boolean dragEnabled;
+    private boolean puzzleSolved;
 
     TableLayout table;
+    TextView puzzleStatusView;
+
+    //aniamtions
+    ObjectAnimator puzzleSolvedAnimation;
+    ObjectAnimator textFadeIn;
+    ObjectAnimator textFadeOut;
+    ObjectAnimator imageFadeIn;
+    ObjectAnimator imageFadeOut;
+
+    public enum AnimationType {
+        PUZZLESOLVED, RESTART, RESHUFFLE
+    }
+
+    AnimationType fadeType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +71,12 @@ public class SolveImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_solve_image);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        
+        dragEnabled = true;
+        fadeType = AnimationType.RESHUFFLE;
+        table = (TableLayout) findViewById(R.id.shuffledImageTable);
+        puzzleStatusView = (TextView) findViewById(R.id.puzzleStatus);
+        
         //Retrieve image uri and get retrieve the image
         Intent intent = getIntent();
         imageUri = Uri.parse(intent.getStringExtra(PickImageActivity.EXTRA_URI));
@@ -62,8 +90,26 @@ public class SolveImageActivity extends AppCompatActivity {
         //create the image pieces and shuffle them in place
         imagePuzzle = new ImagePuzzle();
         imagePuzzle.init(tableWidth, tableHeight, originalImage);
-        table = (TableLayout) findViewById(R.id.shuffledImageTable);
         createTableBody(table);
+
+        //set animations
+        textFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
+        textFadeIn.setTarget(puzzleStatusView);
+        textFadeOut =  (ObjectAnimator) AnimatorInflater.loadAnimator(
+                this, R.animator.fade_out);
+        textFadeOut.addListener(new textFadeAnimationListener());
+        textFadeOut.setTarget(puzzleStatusView);
+
+        imageFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
+        imageFadeIn.setTarget(table);
+        imageFadeOut =  (ObjectAnimator) AnimatorInflater.loadAnimator(
+                this, R.animator.fade_out);
+        imageFadeOut.addListener(new imageFadeAnimationListener());
+        imageFadeOut.setTarget(table);
+
+        //start fade in animation upon load
+        textFadeIn.start();
+        imageFadeIn.start();
     }
 
     /*
@@ -80,7 +126,7 @@ public class SolveImageActivity extends AppCompatActivity {
             for(int j = 0; j < tableWidth; j++) {
                 ImageView view = new ImageView(this);
                 view.setAdjustViewBounds(true);
-                view.setPadding(5, 5, 5, 5);
+                view.setPadding(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE);
                 view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                 view.setTag(index);
                 view.setOnLongClickListener(new ImageOnLongClickListener());
@@ -142,7 +188,10 @@ public class SolveImageActivity extends AppCompatActivity {
                     view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                     if(imagePuzzle.isPuzzleSolved()) {
                         view.setOnLongClickListener(null);
+                        fadeType = AnimationType.PUZZLESOLVED;
                         dragEnabled = false;
+                        textFadeOut.start();
+                        imageFadeOut.start();
                     }
                     return true;
 
@@ -171,17 +220,85 @@ public class SolveImageActivity extends AppCompatActivity {
 
     /*
     ** onClick listener for reshuffle button.
+    ** Starts the animation for reshuffle
+     */
+    public void reShuffleButton(View view) {
+        if(fadeType == AnimationType.PUZZLESOLVED) {
+            fadeType = AnimationType.RESTART;
+            textFadeOut.start();
+        }
+        imageFadeOut.start();
+    }
+
+    /*
     ** Reshuffles the image and sets the bitmap images for each table cell.
      */
-    public void reShuffle(View view) {
+    private void reShuffle() {
         imagePuzzle.reShuffle();
         for(int i = 0; i < tableWidth * tableHeight; i++) {
             ImageView imageView = (ImageView) table.findViewWithTag(i);
             imageView.setImageBitmap(imagePuzzle.getImageAt(i));
+
             //re-enable drag listener if disabled
             if (!dragEnabled) {
                 imageView.setOnLongClickListener(new ImageOnLongClickListener());
             }
+        }
+    }
+
+    private class imageFadeAnimationListener implements Animator.AnimatorListener {
+        @Override
+        public void onAnimationCancel(Animator animation) {}
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {}
+
+        @Override
+        public void onAnimationStart(Animator animation) {}
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if(fadeType == fadeType.PUZZLESOLVED) {
+                //remove borders
+                for(int i = 0; i < tableHeight * tableWidth; i++) {
+                    ImageView view = (ImageView) table.findViewWithTag(i);
+                    view.setPadding(0, 0, 0, 0);
+                }
+            } else {
+                if (fadeType == fadeType.RESTART) {
+                    //add borders
+                    for (int i = 0; i < tableHeight * tableWidth; i++) {
+                        ImageView view = (ImageView) table.findViewWithTag(i);
+                        view.setPadding(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE);
+                    }
+                    fadeType = fadeType.RESHUFFLE;
+                }
+                //reshuffle image
+                reShuffle();
+            }
+            imageFadeIn.start();
+        }
+    }
+
+    private class textFadeAnimationListener implements Animator.AnimatorListener {
+        @Override
+        public void onAnimationCancel(Animator animation) {}
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {}
+
+        @Override
+        public void onAnimationStart(Animator animation) {}
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if(fadeType == AnimationType.PUZZLESOLVED) {
+                puzzleStatusView.setText(R.string.solved);
+
+            } else if(fadeType == AnimationType.RESTART){
+                puzzleStatusView.setText(R.string.solve_the_image);
+            }
+            textFadeIn.start();
         }
     }
 
