@@ -1,4 +1,4 @@
-//TODO: add animations to solved and reshuffle
+//TODO: add custom listeners?
 //TODO: add "hint" functionality
 //TODO: add ability to send puzzles to friends
 //TODO: add sounds
@@ -39,26 +39,27 @@ import static com.example.sean.myapplication.Util.Util.messageBox;
 
 public class SolveImageActivity extends AppCompatActivity {
     //default table size set to be 3x3
-    private int tableWidth = 3, tableHeight = 3;
+    private static int tableWidth = 3, tableHeight = 3;
+
+    //border size for table cells
     private final static int BORDERSIZE = 2;
 
     //image URI received from main activity
-    private  Uri imageUri;
+    private Uri imageUri;
     private Bitmap originalImage;
     private ImagePuzzle imagePuzzle;
     private boolean dragEnabled;
-    private boolean puzzleSolved;
 
     TableLayout table;
     TextView puzzleStatusView;
 
-    //aniamtions
-    ObjectAnimator puzzleSolvedAnimation;
+    //animations
     ObjectAnimator textFadeIn;
     ObjectAnimator textFadeOut;
     ObjectAnimator imageFadeIn;
     ObjectAnimator imageFadeOut;
 
+    //enum for which animation should be used
     public enum AnimationType {
         PUZZLESOLVED, RESTART, RESHUFFLE
     }
@@ -71,6 +72,7 @@ public class SolveImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_solve_image);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         
         dragEnabled = true;
         fadeType = AnimationType.RESHUFFLE;

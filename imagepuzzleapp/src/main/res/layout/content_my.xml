@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
+    android:paddingBottom="16dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_my">
 
@@ -32,14 +33,15 @@
         android:adjustViewBounds="true"
         android:onClick="loadImageFromGalleryWrapper"/>
 
-    <Button
+    <ImageButton
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="center"
         android:paddingTop="0dp"
-        android:text="@string/button_shuffle"
+        android:background="@null"
+        android:src="@drawable/dice_button"
         android:onClick="shuffleImage"/>
 
 
