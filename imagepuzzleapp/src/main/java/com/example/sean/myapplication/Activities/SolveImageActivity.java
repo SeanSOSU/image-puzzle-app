@@ -19,7 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.DragEvent;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -27,12 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sean.myapplication.Models.ImagePuzzle;
-import com.example.sean.myapplication.Models.PuzzlePiece;
 import com.example.sean.myapplication.R;
 import com.example.sean.myapplication.Util.Util;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.sean.myapplication.Util.Util.getBitmapFromUri;
 import static com.example.sean.myapplication.Util.Util.messageBox;
@@ -42,7 +37,8 @@ public class SolveImageActivity extends AppCompatActivity {
     private static int tableWidth = 3, tableHeight = 3;
 
     //border size for table cells
-    private final static int BORDERSIZE = 2;
+    private final static int BORDER_SIZE = 2;
+    private final static int DRAG_ENTERED_SIZE = 10;
 
     //image URI received from main activity
     private Uri imageUri;
@@ -93,6 +89,7 @@ public class SolveImageActivity extends AppCompatActivity {
         imagePuzzle = new ImagePuzzle();
         imagePuzzle.init(tableWidth, tableHeight, originalImage);
         createTableBody(table);
+        setPuzzlePieces();
 
         //set animations
         textFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
@@ -128,12 +125,11 @@ public class SolveImageActivity extends AppCompatActivity {
             for(int j = 0; j < tableWidth; j++) {
                 ImageView view = new ImageView(this);
                 view.setAdjustViewBounds(true);
-                view.setPadding(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE);
+                view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
                 view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                 view.setTag(index);
                 view.setOnLongClickListener(new ImageOnLongClickListener());
                 view.setOnDragListener(new ImageDragEventListener());
-                view.setImageBitmap(imagePuzzle.getPieceList().get(index).getBitmap());
                 row.addView(view, new TableRow.LayoutParams(0,
                         TableRow.LayoutParams.MATCH_PARENT, 1));
                 index++;
@@ -148,7 +144,7 @@ public class SolveImageActivity extends AppCompatActivity {
     private final class ImageOnLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View view) {
-            ClipData.Item item = new ClipData.Item((CharSequence)view.getTag().toString());
+            ClipData.Item item = new ClipData.Item(view.getTag().toString());
             String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
             ClipData dragData = new ClipData(view.getTag().toString(), mimeTypes, item);
             View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
@@ -171,14 +167,18 @@ public class SolveImageActivity extends AppCompatActivity {
                     return true;
 
                 case DragEvent.ACTION_DRAG_ENTERED:
+                    view.setPadding(DRAG_ENTERED_SIZE, DRAG_ENTERED_SIZE,
+                            DRAG_ENTERED_SIZE, DRAG_ENTERED_SIZE);
                     view.setBackgroundColor(Color.parseColor(Util.VIEW_SELECTED_FOR_DROP_COLOR));
                     return true;
 
                 case DragEvent.ACTION_DRAG_EXITED:
+                    view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
                     view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                     return true;
 
                 case DragEvent.ACTION_DROP:
+                    view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
                     view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                     ClipData.Item item = event.getClipData().getItemAt(0);
                     int i = (int) view.getTag();
@@ -225,6 +225,7 @@ public class SolveImageActivity extends AppCompatActivity {
     ** Starts the animation for reshuffle
      */
     public void reShuffleButton(View view) {
+        imagePuzzle.reShuffle();
         if(fadeType == AnimationType.PUZZLESOLVED) {
             fadeType = AnimationType.RESTART;
             textFadeOut.start();
@@ -237,6 +238,18 @@ public class SolveImageActivity extends AppCompatActivity {
      */
     private void reShuffle() {
         imagePuzzle.reShuffle();
+        for(int i = 0; i < tableWidth * tableHeight; i++) {
+            ImageView imageView = (ImageView) table.findViewWithTag(i);
+            imageView.setImageBitmap(imagePuzzle.getImageAt(i));
+
+            //re-enable drag listener if disabled
+            if (!dragEnabled) {
+                imageView.setOnLongClickListener(new ImageOnLongClickListener());
+            }
+        }
+    }
+
+    private void setPuzzlePieces() {
         for(int i = 0; i < tableWidth * tableHeight; i++) {
             ImageView imageView = (ImageView) table.findViewWithTag(i);
             imageView.setImageBitmap(imagePuzzle.getImageAt(i));
@@ -271,12 +284,12 @@ public class SolveImageActivity extends AppCompatActivity {
                     //add borders
                     for (int i = 0; i < tableHeight * tableWidth; i++) {
                         ImageView view = (ImageView) table.findViewWithTag(i);
-                        view.setPadding(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE);
+                        view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
                     }
                     fadeType = fadeType.RESHUFFLE;
                 }
-                //reshuffle image
-                reShuffle();
+                //set reshuffled image
+                setPuzzlePieces();
             }
             imageFadeIn.start();
         }
