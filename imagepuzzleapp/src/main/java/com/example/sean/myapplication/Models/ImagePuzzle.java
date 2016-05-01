@@ -96,6 +96,7 @@ public class ImagePuzzle {
         Collections.swap(pieceList, i, j);
     }
 
+    //helper functions
     public Bitmap getImageAt(int i) {
         return pieceList.get(i).getBitmap();
     }
@@ -105,7 +106,7 @@ public class ImagePuzzle {
     }
 
     /*
-    ** shuffles the ordering of puzzle pieces
+    ** Shuffles the ordering of puzzle pieces
      */
     private void shuffle() {
         Collections.shuffle(pieceList);
