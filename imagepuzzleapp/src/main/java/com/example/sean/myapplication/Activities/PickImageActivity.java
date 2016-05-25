@@ -29,7 +29,9 @@ public class PickImageActivity extends AppCompatActivity {
     public final static String EXTRA_URI = "com.example.sean.myapplication.URI";
     private static int RESULT_LOAD_IMG = 1;
     private final static int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+    private final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
 
+    private Uri photoUri;
     Uri imageUri = null;
 
     @Override
@@ -126,7 +128,7 @@ public class PickImageActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
-                messageBox("Error", e.getMessage(), this);
+                messageBox(this, "Error", e.getMessage());
         }
     }
 

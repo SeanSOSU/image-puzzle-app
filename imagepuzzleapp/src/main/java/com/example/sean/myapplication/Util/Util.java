@@ -23,11 +23,12 @@ public final class Util {
     public final static String BACKGROUND_COLOR = "#000000";
     public final static String DRAG_EVENT_STARTED_COLOR = "#1a66ff";
     public final static String VIEW_SELECTED_FOR_DROP_COLOR = "#4ce600";
+    public final static String CORRECT_POSITION_COLOR = "#4ce600";
 
     /**
     * Displays a message in a message box
      */
-    public static void messageBox(String method, String message, Activity activity) {
+    public static void messageBox(Activity activity, String method, String message) {
         Log.d("EXCEPTION: " + method, message);
 
         AlertDialog.Builder messageBox = new AlertDialog.Builder(activity);
@@ -41,7 +42,7 @@ public final class Util {
     /**
      * Retrieves bitmap from Uri and returns it
      */
-    public static Bitmap getBitmapFromUri(Uri uri, Context context) throws IOException {
+    public static Bitmap getBitmapFromUri(Context context, Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
                 context.getContentResolver().openFileDescriptor(uri, "r");
         FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();

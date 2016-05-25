@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#245a79</color>
-    <color name="colorPrimaryDark">#245a79</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="colorImageBorder">#000000</color>
+    <color name="primary_color">#245a79</color>
+    <color name="primary_dark_color">#245a79</color>
+    <color name="accent_color">#FF4081</color>
+    <color name="image_border_normal">#000000</color>
+    <color name="image_border_selected">#4ce600</color>
+    <color name="correct_position">#4ce600</color>
+    <color name="wrong_position">#e62e00</color>
 </resources>

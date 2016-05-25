@@ -26,21 +26,35 @@
     <TableLayout
         android:id="@+id/shuffledImageTable"
         android:padding="1dp"
-        android:background="@color/colorImageBorder"
+        android:background="@color/image_border_normal"
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TableLayout>
+        android:layout_height="wrap_content" />
 
-    <ImageButton
+    <LinearLayout
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="0dp"
-        android:background="@null"
-        android:src="@drawable/dice_button"
-        android:onClick="reShuffleButton"/>
+        android:gravity="center">
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:background="@null"
+            android:src="@drawable/dice_button"
+            android:onClick="reShuffleButton"/>
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:background="@null"
+            android:src="@drawable/hint_button"
+            android:onClick="showHintButton"/>
+    </LinearLayout>
 
 </RelativeLayout>

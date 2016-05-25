@@ -1,6 +1,7 @@
 package com.example.sean.myapplication.Models;
 
 import android.graphics.Bitmap;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +35,6 @@ public class ImagePuzzle {
         this.height = height;
         createPuzzlePieces(bitmap);
         shuffle();
-        initCorrectPositions();
     }
 
     public int getWidth() { return width; }
@@ -108,13 +108,9 @@ public class ImagePuzzle {
     /*
     ** Shuffles the ordering of puzzle pieces
      */
-    private void shuffle() {
+    public void shuffle() {
         Collections.shuffle(pieceList);
-    }
-
-    public void reShuffle() {
-        this.shuffle();
-        this.initCorrectPositions();
+        initCorrectPositions();
     }
 
     /*
@@ -127,6 +123,14 @@ public class ImagePuzzle {
             if(i == pieceList.get(i).getOriginalIndex()) {
                 correctPositions++;
             }
+        }
+    }
+
+    public boolean inCorrectPosition(int index) {
+        try {
+            return (pieceList.get(index).getOriginalIndex() == index);
+        } catch(ArrayIndexOutOfBoundsException e) {
+            throw e;
         }
     }
 }

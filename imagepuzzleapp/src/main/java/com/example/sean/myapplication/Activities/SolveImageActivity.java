@@ -1,8 +1,8 @@
 //TODO: add custom listeners?
-//TODO: add "hint" functionality
 //TODO: add ability to send puzzles to friends
 //TODO: add sounds
-//TODO: add save function
+//TODO: add dimensions option
+//TODO: add camera functionality
 
 package com.example.sean.myapplication.Activities;
 
@@ -72,10 +72,10 @@ public class SolveImageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         imageUri = Uri.parse(intent.getStringExtra(PickImageActivity.EXTRA_URI));
         try {
-            originalImage = getBitmapFromUri(imageUri, this);
+            originalImage = getBitmapFromUri(this, imageUri);
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
-            messageBox("Error", e.getMessage(), this);
+            messageBox(this, "Error", e.getMessage());
         }
 
         //create the image pieces and shuffle them in place
@@ -84,7 +84,6 @@ public class SolveImageActivity extends AppCompatActivity {
         createTableBody(table);
         setPuzzlePieces();
 
-        //set fade in animations
         textFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
         textFadeIn.setTarget(puzzleStatusView);
         imageFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
@@ -105,8 +104,6 @@ public class SolveImageActivity extends AppCompatActivity {
             for(int j = 0; j < tableWidth; j++) {
                 ImageView view = new ImageView(this);
                 view.setAdjustViewBounds(true);
-                view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
-                view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                 view.setTag(index);
                 view.setOnLongClickListener(new imageOnLongClickListener());
                 view.setOnDragListener(new ImageDragEventListener());
@@ -130,9 +127,6 @@ public class SolveImageActivity extends AppCompatActivity {
             View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
 
             view.startDrag(dragData, shadowBuilder, view, 0);
-            view.setPadding(VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE,
-                    VIEW_SELECTED_SIZE);
-            view.setBackgroundColor(android.graphics.Color.WHITE);
             return true;
         }
     }
@@ -152,17 +146,15 @@ public class SolveImageActivity extends AppCompatActivity {
                 case DragEvent.ACTION_DRAG_ENTERED:
                     view.setPadding(VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE,
                             VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE);
-                    view.setBackgroundColor(Color.parseColor(Util.VIEW_SELECTED_FOR_DROP_COLOR));
+                    view.setBackgroundResource(R.color.image_border_selected);
                     return true;
 
                 case DragEvent.ACTION_DRAG_EXITED:
                     view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
-                    view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
+                    view.setBackgroundResource(R.color.image_border_normal);
                     return true;
 
                 case DragEvent.ACTION_DROP:
-                    view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
-                    view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
                     ClipData.Item item = event.getClipData().getItemAt(0);
                     int i = (int) view.getTag();
                     int j = Integer.parseInt(item.getText().toString());
@@ -170,7 +162,8 @@ public class SolveImageActivity extends AppCompatActivity {
                     return true;
 
                 case DragEvent.ACTION_DRAG_ENDED:
-                    view.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
+                    view.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
+                    view.setBackgroundResource(R.color.image_border_normal);
                     if(imagePuzzle.isPuzzleSolved()) {
                         view.setOnLongClickListener(null);
                         dragEnabled = false;
@@ -187,7 +180,7 @@ public class SolveImageActivity extends AppCompatActivity {
     }
 
     /*
-    ** Swaps the position of bitmap images in the views of the table
+    ** Swaps the position of bitmap images in the views of the table and in the logic
      */
     private void swapImages(int i, int j) {
         if(i == j) {
@@ -198,6 +191,7 @@ public class SolveImageActivity extends AppCompatActivity {
         ImageView viewJ = (ImageView) table.findViewWithTag(j);
         viewI.setImageBitmap(imagePuzzle.getImageAt(j));
         viewJ.setImageBitmap(imagePuzzle.getImageAt(i));
+
         imagePuzzle.swap(i, j);
     }
 
@@ -211,7 +205,33 @@ public class SolveImageActivity extends AppCompatActivity {
         } else {
             doReshuffleAnim();
         }
-        imagePuzzle.reShuffle();
+        imagePuzzle.shuffle();
+    }
+
+    /*
+    ** onClick listener for hint button.
+    ** Highlights a piece to be dragged and dropped to its correct position
+     */
+    public void showHintButton(View view) {
+        if(imagePuzzle.isPuzzleSolved()) {
+            return;
+        }
+
+        //find first piece not in correct position
+        int wrongIndex = 0;
+        while(imagePuzzle.inCorrectPosition(wrongIndex)) {
+            wrongIndex++;
+        }
+        int correctIndex = imagePuzzle.getOriginalIndexOf(wrongIndex);
+
+        ImageView correctView = (ImageView) table.findViewWithTag(correctIndex);
+        ImageView wrongView = (ImageView) table.findViewWithTag(wrongIndex);
+        correctView.setPadding(VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE,
+                VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE);
+        wrongView.setPadding(VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE,
+                VIEW_SELECTED_SIZE, VIEW_SELECTED_SIZE);
+        correctView.setBackgroundResource(R.color.correct_position);
+        wrongView.setBackgroundResource(R.color.wrong_position);
     }
 
     /*
@@ -221,6 +241,8 @@ public class SolveImageActivity extends AppCompatActivity {
         for(int i = 0; i < tableWidth * tableHeight; i++) {
             ImageView imageView = (ImageView) table.findViewWithTag(i);
             imageView.setImageBitmap(imagePuzzle.getImageAt(i));
+            imageView.setPadding(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE);
+            imageView.setBackgroundColor(Color.parseColor(Util.BACKGROUND_COLOR));
 
             //re-enable drag listener if disabled
             if (!dragEnabled) {
@@ -275,6 +297,7 @@ public class SolveImageActivity extends AppCompatActivity {
             }
         });
         imageFadeOut.setTarget(table);
+
         imageFadeOut.start();
     }
 
