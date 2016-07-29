@@ -3,6 +3,7 @@
 //TODO: add sounds
 //TODO: add dimensions option
 //TODO: add camera functionality
+//TODO: change hint to replace first index with correct piece
 
 package com.example.sean.myapplication.Activities;
 

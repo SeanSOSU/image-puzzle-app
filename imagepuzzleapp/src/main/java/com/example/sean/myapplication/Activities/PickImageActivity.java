@@ -8,10 +8,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,16 +23,21 @@ import android.widget.Toast;
 
 import com.example.sean.myapplication.R;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.example.sean.myapplication.Util.Util.messageBox;
 
 public class PickImageActivity extends AppCompatActivity {
     public final static String EXTRA_URI = "com.example.sean.myapplication.URI";
-    private static int RESULT_LOAD_IMG = 1;
+    private static int  RESULT_LOAD_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    private final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 200;
     private final static int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
-    private final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    public final static int MEDIA_TYPE_IMAGE = 1;
+    public final static int MEDIA_TYPE_VIDEO = 2;
 
     private Uri photoUri;
     Uri imageUri = null;
@@ -37,7 +45,7 @@ public class PickImageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -86,7 +94,7 @@ public class PickImageActivity extends AppCompatActivity {
     public void loadImageFromGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+        startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE_ACTIVITY_REQUEST_CODE);
     }
 
     @Override
@@ -117,7 +125,8 @@ public class PickImageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         try {
-            if (requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK && data != null) {
+            if (requestCode == RESULT_LOAD_IMAGE_ACTIVITY_REQUEST_CODE
+                    && resultCode == RESULT_OK && data != null) {
                 imageUri = data.getData();
                 Bitmap imageBitmap = getBitmapFromUri(imageUri);
 
@@ -181,7 +190,7 @@ public class PickImageActivity extends AppCompatActivity {
     /*
     ** Opens SolveImageActivity and sends the bitmap Uri
      */
-    public void shuffleImage(View view) {
+    public void shuffleImageButton(View view) {
         //If imageUri is null, then an image has not been selected yet.
         if(imageUri == null) {
             Toast.makeText(this, "You have not selected an image.", Toast.LENGTH_LONG).show();
@@ -191,6 +200,54 @@ public class PickImageActivity extends AppCompatActivity {
         Intent shuffleIntent = new Intent(this, SolveImageActivity.class);
         shuffleIntent.putExtra(EXTRA_URI, imageUri.toString());
         startActivity(shuffleIntent);
+    }
+
+    /*
+    public void takePhotoButton() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        Uri photoUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+    }
+    */
+
+    /** Create a file Uri for saving an image or video */
+    private static Uri getOutputMediaFileUri(int type){
+        return Uri.fromFile(getOutputMediaFile(type));
+    }
+
+    /** Create a File for saving an image or video */
+    private static File getOutputMediaFile(int type){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if(!mediaStorageDir.exists()){
+            if(!mediaStorageDir.mkdirs()){
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
     }
 
     private Bitmap getBitmapFromUri(Uri uri) throws IOException {

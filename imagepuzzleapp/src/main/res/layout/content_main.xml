@@ -9,7 +9,7 @@
     android:paddingRight="16dp"
     android:paddingBottom="16dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/activity_my">
+    tools:showIn="@layout/activity_main">
 
     <TextView
         android:id="@+id/SelectText"
@@ -33,15 +33,30 @@
         android:adjustViewBounds="true"
         android:onClick="loadImageFromGalleryWrapper"/>
 
-    <ImageButton
+    <LinearLayout
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="0dp"
-        android:background="@null"
-        android:src="@drawable/dice_button"
-        android:onClick="shuffleImage"/>
+        android:gravity="center">
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:background="@null"
+            android:src="@drawable/camera_button"
+            android:onClick="takePhotoButton"/>
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:background="@null"
+            android:src="@drawable/dice_button"
+            android:onClick="shuffleImageButton"/>
+    </LinearLayout>
 
 </RelativeLayout>
