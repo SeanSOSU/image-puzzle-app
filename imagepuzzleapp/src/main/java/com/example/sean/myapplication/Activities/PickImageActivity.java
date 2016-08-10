@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.example.sean.myapplication.R;
@@ -33,11 +34,13 @@ import static com.example.sean.myapplication.Util.Util.messageBox;
 
 public class PickImageActivity extends AppCompatActivity {
     public final static String EXTRA_URI = "com.example.sean.myapplication.URI";
+    public final static String EXTRA_DIMENSION ="dimensionSize";
     private static int  RESULT_LOAD_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 200;
     private final static int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     public final static int MEDIA_TYPE_IMAGE = 1;
     public final static int MEDIA_TYPE_VIDEO = 2;
+    private static int puzzleDimension = 0;
 
     private Uri photoUri;
     Uri imageUri = null;
@@ -141,6 +144,9 @@ public class PickImageActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Loads placeholder image until another is selected
+     */
     public void loadDefaultImage() {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -188,6 +194,31 @@ public class PickImageActivity extends AppCompatActivity {
     }
 
     /*
+    ** Sets puzzle dimension size from radio button click
+     */
+    public void onPuzzleDimensionClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+
+        switch(view.getId()) {
+            case R.id.radio_3:
+                if(checked)
+                    puzzleDimension = 3;
+                break;
+            case R.id.radio_4:
+                if(checked)
+                    puzzleDimension = 4;
+                break;
+            case R.id.radio_5:
+                if(checked)
+                    puzzleDimension = 5;
+                break;
+            default:
+                puzzleDimension = 0;
+                break;
+        }
+    }
+
+    /*
     ** Opens SolveImageActivity and sends the bitmap Uri
      */
     public void shuffleImageButton(View view) {
@@ -195,21 +226,28 @@ public class PickImageActivity extends AppCompatActivity {
         if(imageUri == null) {
             Toast.makeText(this, "You have not selected an image.", Toast.LENGTH_LONG).show();
             return;
+        } else if(puzzleDimension == 0) {
+            Toast.makeText(this, "You have not selected a dimension size.",
+                    Toast.LENGTH_LONG).show();
+            return;
         }
 
         Intent shuffleIntent = new Intent(this, SolveImageActivity.class);
         shuffleIntent.putExtra(EXTRA_URI, imageUri.toString());
+        shuffleIntent.putExtra(EXTRA_DIMENSION, puzzleDimension);
         startActivity(shuffleIntent);
     }
+
 
     /*
     public void takePhotoButton() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         Uri photoUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-    }
-    */
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+    }*/
 
     /** Create a file Uri for saving an image or video */
     private static Uri getOutputMediaFileUri(int type){
