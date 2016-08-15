@@ -44,8 +44,8 @@
             android:paddingLeft="25dp"
             android:paddingRight="25dp"
             android:background="@null"
-            android:src="@drawable/dice_button"
-            android:onClick="reShuffleButton"/>
+            android:src="@drawable/hint_button"
+            android:onClick="showHintButton"/>
 
         <ImageButton
             android:layout_height="wrap_content"
@@ -53,8 +53,8 @@
             android:paddingLeft="25dp"
             android:paddingRight="25dp"
             android:background="@null"
-            android:src="@drawable/hint_button"
-            android:onClick="showHintButton"/>
+            android:src="@drawable/dice_button"
+            android:onClick="reShuffleButton"/>
     </LinearLayout>
 
 </RelativeLayout>
