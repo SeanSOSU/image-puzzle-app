@@ -15,13 +15,16 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -69,7 +72,7 @@ public class SolveImageActivity extends AppCompatActivity {
         table = (TableLayout) findViewById(R.id.shuffledImageTable);
         puzzleStatusView = (TextView) findViewById(R.id.puzzleStatus);
         
-        //Retrieve image uri and get retrieve the image
+        //Retrieve image uri and retrieve the image
         Intent intent = getIntent();
         imageUri = Uri.parse(intent.getStringExtra(PickImageActivity.EXTRA_URI));
         try {
@@ -78,18 +81,37 @@ public class SolveImageActivity extends AppCompatActivity {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
             messageBox(this, "Error", e.getMessage());
         }
+        //Retrieve dimension size from intent
+        tableWidth = intent.getIntExtra(PickImageActivity.EXTRA_DIMENSION, 3);
+        tableHeight = intent.getIntExtra(PickImageActivity.EXTRA_DIMENSION, 3);
 
         //create the image pieces and shuffle them in place
         imagePuzzle = new ImagePuzzle();
         imagePuzzle.init(tableWidth, tableHeight, originalImage);
+
+
+
         createTableBody(table);
         setPuzzlePieces();
+
+        //set table height parameters after layout
+        table.post(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0; i < tableHeight; i++){
+                    TableRow row = (TableRow) table.getChildAt(i);
+                    row.setLayoutParams(new TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT, 0, 1.0f));
+                }
+            }
+        });
 
         textFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
         textFadeIn.setTarget(puzzleStatusView);
         imageFadeIn =  (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.fade_in);
         imageFadeIn.setTarget(table);
     }
+
 
     /*
     ** Creates a table with tableWidth x tableHeight dimensions.
@@ -98,21 +120,21 @@ public class SolveImageActivity extends AppCompatActivity {
      */
     public void createTableBody(TableLayout table) {
         int index = 0;
+
         for(int i = 0; i < tableHeight; i++) {
-            TableRow row = new TableRow(this);
-            row.setLayoutParams(new TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT, 0, 1));
+            TableRow tableRow = (TableRow) getLayoutInflater().inflate(R.layout.table_row, null);
+
             for(int j = 0; j < tableWidth; j++) {
-                ImageView view = new ImageView(this);
-                view.setAdjustViewBounds(true);
-                view.setTag(index);
-                view.setOnLongClickListener(new imageOnLongClickListener());
-                view.setOnDragListener(new ImageDragEventListener());
-                row.addView(view, new TableRow.LayoutParams(0,
-                        TableRow.LayoutParams.MATCH_PARENT, 1));
+                ImageView tableCell = (ImageView) getLayoutInflater().inflate(
+                        R.layout.table_cell, null);
+                tableCell.setTag(index);
+                tableCell.setOnLongClickListener(new imageOnLongClickListener());
+                tableCell.setOnDragListener(new ImageDragEventListener());
+                tableRow.addView(tableCell, new TableRow.LayoutParams(0,
+                        TableRow.LayoutParams.MATCH_PARENT, 1.0f));
                 index++;
             }
-            table.addView(row);
+            table.addView(tableRow);
         }
     }
 
